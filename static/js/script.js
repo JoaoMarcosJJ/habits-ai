@@ -12,10 +12,25 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMessage = document.getElementById('error-message');
     const closeModalBtn = document.getElementById('close-modal-btn');
 
+    const welcomeModal = document.getElementById('welcome-modal');
+    const closeWelcomeBtn = document.getElementById('close-welcome-btn');
+
+    function showWelcomeModal() {
+        const hasSeenWelcome = localStorage.getItem('hasSeenWelcome');
+
+        if (!hasSeenWelcome) {
+            welcomeModal.classList.remove('hidden');
+        }
+    }
+
+    function hideWelcomeModal() {
+        welcomeModal.classList.add('hidden');
+
+        localStorage.setItem('hasSeenWelcome', 'true');
+    } 
+
     let habits = []; 
     let chartInstances = {};
-
-    // --- Funções de UI (Modal e Loading) ---
 
     function showModal(message) {
         errorMessage.textContent = message || "Não foi possível processar sua solicitação.";
@@ -37,12 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
         geminiSuggestBtn.disabled = false;
         geminiSuggestBtn.classList.remove('btn-secondary:disabled');
     }
-
-    // --- Funções Principais de Dados (Fetch API) ---
-
-    /**
-     * Carrega os hábitos do backend
-     */
     async function loadHabits() {
         try {
             const response = await fetch('/api/habits');
@@ -57,12 +66,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /* Renderiza a lista de hábitos na tela */
     function renderHabits() {
-        // Limpa a lista atual
         habitList.innerHTML = '';
         
-        // Destrói gráficos antigos para evitar memory leak
         Object.values(chartInstances).forEach(chart => chart.destroy());
         chartInstances = {};
 
@@ -72,23 +78,18 @@ document.addEventListener('DOMContentLoaded', () => {
             habits.forEach(habit => {
                 const habitElement = createHabitElement(habit);
                 habitList.appendChild(habitElement);
-                
-                // Renderiza o gráfico para este hábito
+            
                 renderChart(habit);
             });
         }
     }
 
-    /* Cria o elemento HTML para um único hábito */
     function createHabitElement(habit) {
         const element = document.createElement('div');
         element.className = 'habit-card';
         
         const todayStr = getTodayString();
         const isCompleted = habit.completed_dates.includes(todayStr);
-
-        // Lógica de cálculo (Streak, Porcentagem)
-        // Estas funções são idênticas às da versão localStorage
         const streak = calculateStreak(habit);
         const percentage = calculateSuccessPercentage(habit);
 
@@ -130,21 +131,17 @@ document.addEventListener('DOMContentLoaded', () => {
             </button>
         `;
 
-        // Adiciona listeners para os botões
         element.querySelector('.habit-delete-btn').addEventListener('click', () => handleDelete(habit.id));
         element.querySelector('.btn-complete').addEventListener('click', () => handleToggleComplete(habit.id));
 
         return element;
     }
     
-    /**
-     * Renderiza o gráfico de 7 dias para um hábito
-     */
     function renderChart(habit) {
         const ctx = document.getElementById(`chart-${habit.id}`).getContext('2d');
         if (!ctx) return;
 
-        const { labels, data } = getChartData(habit, 7); // Pegar dados dos últimos 7 dias
+        const { labels, data } = getChartData(habit, 7);
 
         if (chartInstances[habit.id]) {
             chartInstances[habit.id].destroy();
@@ -186,11 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- Handlers de Eventos (Fetch API) ---
-
-    /**
-     * Adiciona um novo hábito (via formulário)
-     */
     async function handleFormSubmit(e) {
         e.preventDefault();
         const habitName = habitInput.value.trim();
@@ -208,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
                 
                 habitInput.value = '';
-                await loadHabits(); // Recarrega a lista do servidor
+                await loadHabits(); 
 
             } catch (error) {
                 console.error(error);
@@ -217,9 +209,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    /**
-     * Handler: Botão Gemini para sugestões
-     */
     async function handleGeminiSuggest() {
         const goal = habitInput.value.trim();
         if (!goal) {
@@ -230,7 +219,6 @@ document.addEventListener('DOMContentLoaded', () => {
         showLoading();
 
         try {
-            // Chama o *nosso* backend, que por sua vez chama o Gemini
             const response = await fetch('/api/suggest', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -242,10 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error(errData.error || "Erro ao gerar sugestões.");
             }
 
-            // O backend já adicionou os hábitos no DB.
-            // Nós apenas precisamos recarregar a lista.
             await loadHabits();
-            habitInput.value = ''; // Limpa o input
+            habitInput.value = '';
 
         } catch (error) {
             console.error("Erro ao chamar a API de sugestão:", error);
@@ -255,9 +241,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Marca um hábito como completo/incompleto para hoje
-     */
     async function handleToggleComplete(id) {
         const todayStr = getTodayString();
         try {
@@ -270,9 +253,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) {
                 throw new Error('Não foi possível atualizar o hábito.');
             }
-            
-            // Recarrega tudo para simplicidade.
-            // Uma otimização seria apenas atualizar o 'habits' local.
             await loadHabits(); 
 
         } catch (error) {
@@ -281,11 +261,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    /**
-     * Deleta um hábito
-     */
     async function handleDelete(id) {
-        // Futuramente, adicionar um modal de confirmação aqui.
         try {
             const response = await fetch(`/api/habits/${id}`, {
                 method: 'DELETE'
@@ -295,15 +271,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Não foi possível deletar o hábito.');
             }
 
-            await loadHabits(); // Recarrega a lista
+            await loadHabits();
 
         } catch (error) {
             console.error(error);
             showModal(error.message);
         }
     }
-
-    // --- Funções Utilitárias (Lógica Pura - Idênticas) ---
 
     function getTodayString() {
         return new Date().toISOString().split('T')[0];
@@ -315,7 +289,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function calculateStreak(habit) {
         let streak = 0;
-        // Agora acessamos 'completed_dates'
         const sortedDates = [...habit.completed_dates].sort().reverse();
         if (sortedDates.length === 0) return 0;
         
@@ -343,7 +316,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculateSuccessPercentage(habit) {
-        // Agora acessamos 'completed_dates' e 'created_at'
+
         if (habit.completed_dates.length === 0) return 0;
         
         const startDate = new Date(habit.created_at);
@@ -372,11 +345,12 @@ document.addEventListener('DOMContentLoaded', () => {
         return { labels: labels.reverse(), data: data.reverse() };
     }
 
-    // --- Inicialização ---
     habitForm.addEventListener('submit', handleFormSubmit);
     geminiSuggestBtn.addEventListener('click', handleGeminiSuggest);
     closeModalBtn.addEventListener('click', hideModal);
+    closeWelcomeBtn.addEventListener('click', hideWelcomeModal);
 
-    // Carrega os dados iniciais do backend ao iniciar o app
+
     loadHabits();
+    showWelcomeModal();
 });

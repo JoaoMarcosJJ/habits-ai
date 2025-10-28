@@ -4,9 +4,11 @@ from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime, timezone
 from flask_cors import CORS
+from dotenv import load_dotenv
 
 import google.generativeai as genai
 
+load_dotenv()
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
 CORS(app)
@@ -51,21 +53,22 @@ def get_habits():
 def add_habit():
     data = request.json
     if not data or 'name' not in data:
-        return jsonify({'error': 'Nome é obrigatório'})
+        return jsonify({'error': 'Nome é obrigatório'}), 400
         
     try:
         new_habit = Habit(name=data['name'], completed_dates='[]')
         db.session.add(new_habit)
         db.session.commit()
-        return jsonify({'message': 'Hábito adicionado com sucesso'}), 201
+        return jsonify(new_habit.to_dict()), 201
     
     except Exception as e:
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500
     
-@app.route('/apu/habits/<int:habit_id>', methods=['DELETE'])
+@app.route('/api/habits/<int:habit_id>', methods=['DELETE'])
 def delete_habit(habit_id):
     try:
-        habit = Habit.query.get(Habit, habit_id)
+        habit = db.session.get(Habit, habit_id)
         if not habit:
             return jsonify({'error': 'Hábito não encontrado'}), 404
         
@@ -82,12 +85,12 @@ def toggle_habit_completion(habit_id):
     
     data = request.json
     if not data or 'date' not in data:
-        return jsonify({'error': 'Data é obrigatória'}), 404
+        return jsonify({'error': 'Data é obrigatória'}), 400
     
     date_str = data['date']
 
     try:
-        habit = db.session.get(habit, habit_id)
+        habit = db.session.get(Habit, habit_id)
         if not habit:
             return jsonify({'error': 'Hábito não encontrado'}), 404
         
@@ -102,7 +105,7 @@ def toggle_habit_completion(habit_id):
         habit.completed_dates = json.dumps(completed_dates)
         db.session.commit()
 
-        return jsonify(habit.to.dict()), 200
+        return jsonify(habit.to_dict()), 200
     
     except Exception as e:
         db.session.rollback()
@@ -121,7 +124,7 @@ def gemini_suggest():
     goal = data['goal']
 
     try:
-        model = genai.GenerattiveModel('gemini-2.5-flash-preview-09-2025')
+        model = genai.GenerativeModel('gemini-2.5-flash-preview-09-2025')
 
         schema = {
             "type": "OBJECT",
@@ -131,20 +134,20 @@ def gemini_suggest():
                     "items": { "type": "STRING"}
                 }
             },
-            "propertyOrdering": ["habits"]
+            "required": ["habits"]
         }
 
         system_prompt = f""" Você é um choach de produtividade. Sua tarefa é quebrar uma grande meta em 3 a 5 hábitos diários, pequenos e rastreáveis.
         Retorne APENAS o objetivo JSON com a chave "habits".
         Meta do Usuário: "{goal}" """
 
-        response = model.generate_contat(
+        response = model.generate_content( 
             system_prompt,
-            generation_config={
-                "response_mime_type": "application/json",
-                "response_schema": schema
-            }
-        )
+            generation_config=genai.GenerationConfig( 
+                response_mime_type="application/json",
+                response_schema=schema
+            )
+        )    
 
         suggestions = json.loads(response.text) 
         new_habits_list = []
@@ -153,7 +156,7 @@ def gemini_suggest():
             for habit_name in suggestions['habits']:
                 new_habit = Habit(name=habit_name, completed_dates='[]')
                 db.session.add(new_habit)
-                new_habits_list.append(new_habit.to_dict())
+                new_habits_list.append(new_habit)
 
             db.session.commit()
 
@@ -165,7 +168,7 @@ def gemini_suggest():
     except Exception as e:
         db.session.rollback()
         print(f"Erro ao gerar sugestão: {e}")
-        return jsonify({'error': 'Erro ao processar sugestão: {e}'}), 500
+        return jsonify({'error': f'Erro ao processar sugestão: {e}'}), 500
     
 @app.route('/')
 def index():
@@ -174,6 +177,8 @@ def index():
 
 if __name__ == '__main__':
     with app.app_context():
+        instance_path = os.path.join(app.root_path, 'instance')
+        os.makedirs(instance_path, exist_ok=True)
         db.create_all()
 
     app.run(debug=True, host='0.0.0.0', port=5000)

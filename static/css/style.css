@@ -224,7 +224,6 @@ body {
     to { transform: translateY(-50%) rotate(360deg); }
 }
 
-
 .modal-overlay {
     position: fixed;
     inset: 0;
@@ -262,4 +261,8 @@ body {
 
 .modal-close-btn {
     width: 100%;
+}
+
+.modal-title.welcome-title {
+    color: #2563eb;
 }
