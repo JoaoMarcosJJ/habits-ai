@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastreador de Hábitos</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="app-container"></div>
+    <header class="app-header">
+            <h1 class="header-title">Rastreador de Hábitos</h1>
+        </header>
+
+        <div class="add-habit-container">
+            <form id="new-habit-form" class="add-habit-form">
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="habit-input" 
+                        placeholder="Novo hábito ou... ✨ sua grande meta"
+                        class="habit-input"
+                        required
+                    >
+                        
+                    <div id="api-loading" class="spinner hidden"></div>
+                </div>
+                <button 
+                    type="submit"
+                    id="add-habit-btn"
+                    class="btn btn-primary"
+                > Adicionar
+                </button>
+                <button 
+                    type="button" 
+                    id="gemini-suggest-btn"
+                    title="Quebrar meta em hábitos ✨"
+                    class="btn btn-secondary"
+                >
+                   ✨
+                </button>
+            </form>
+        </div>
+
+        <main id="habit-list-container" class="habit-list-container">
+            <div id="habit-list">
+
+                <p id="empty-state" class="empty-state">Nenhum hábito ainda. Adicione um!</p>
+            </div>
+        </main>
+    </div>
+
+    <div id="error-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 class="modal-title">Ocorreu um Erro</h3>
+            <p id="error-message" class="modal-text">Não foi possível processar sua solicitação.</p>
+            <button id="close-modal-btn" class="btn btn-primary modal-close-btn">
+                Fechar
+            </button>
+        </div>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+</body>
+</html>
