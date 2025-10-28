@@ -13,7 +13,7 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///habits.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///instance/habits.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
