@@ -59,4 +59,4 @@ Um simples, mas poderoso, rastreador de hábitos construído com Python (Flask) 
     python app.py
     ```
 
-6.  Abre o teu navegador e visita: `http://127.0.0.1:5000/`
+6.  Abre o teu navegador e visita: `localhost:5000/`
