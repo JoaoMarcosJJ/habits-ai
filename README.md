@@ -76,3 +76,5 @@ Uma aplicação Full-Stack moderna para rastreamento de hábitos, potenciada por
     ```
 
 6.  Abre o teu navegador e visita: `http://127.0.0.1:5000/`
+
+Desenvolvido como projeto de estudo de Engenharia de Software.
