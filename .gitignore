@@ -1,8 +1,27 @@
+# Ambientes e Chaves
 .env
-
 .venv/
-ven/
-__pycache__/
+env/
+venv/
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
 instance/
-*.db
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Node.js / Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.output/
+frontend/.nuxt/
+.npm
+*.log
+
+# Docker & OS
+.DS_Store
+Thumbs.db
+postgres_data/

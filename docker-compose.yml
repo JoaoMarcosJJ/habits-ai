@@ -1,0 +1,58 @@
+version: '3.8'
+
+services:
+  # Banco de Dados
+  db:
+    image: postgres:15-alpine
+    container_name: habits_postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=joao
+      - POSTGRES_PASSWORD=colorado1909
+      - POSTGRES_DB=habits_db 
+    ports:
+      - "5432:5432"
+    networks:
+      - habits_network
+
+  # Backend (Python / FastAPI)
+  backend:
+    build: ./backend
+    container_name: habits_backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    volumes:
+      - ./backend:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - POSTGRES_SERVER=habits_postgres
+      - POSTGRES_USER=joao
+      - POSTGRES_PASSWORD=colorado1909
+      - POSTGRES_DB=habits_db
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+    depends_on:
+      - db
+    networks:
+      - habits_network
+
+  # Frontend (TypeScript / Vue.js)
+  frontend:
+    build: ./frontend
+    container_name: habits_frontend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules 
+    ports:
+      - "3000:5173"
+    depends_on:
+      - backend
+    networks:
+      - habits_network
+
+volumes:
+  postgres_data:
+
+networks:
+  habits_network:
+    driver: bridge

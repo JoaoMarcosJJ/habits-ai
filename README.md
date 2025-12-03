@@ -1,50 +1,66 @@
-# ✨ Rastreador de Hábitos com IA
+# 🌱 Habits GenAI
 
-Um simples, mas poderoso, rastreador de hábitos construído com Python (Flask) e JavaScript, que usa a API do Gemini para sugerir automaticamente novos hábitos com base numa meta maior.
+Uma aplicação Full-Stack moderna para rastreamento de hábitos, potenciada por Inteligência Artificial (Google Gemini) para gerar rotinas personalizadas e fornecer coaching interativo.
 
----
+## 🚀 Funcionalidades
 
-## 🚀 Funcionalidades Principais
+* **Gestão de Hábitos:** Adicionar, remover e marcar hábitos diários como concluídos.
+* **Gerador de Hábitos com IA ✨:** Digite uma meta (ex: "Correr uma maratona") e a IA cria um plano de hábitos acionáveis.
+* **AI Coach Chatbot 🤖:** Um assistente virtual integrado para tirar dúvidas e dar motivação sobre produtividade.
+* **Análise de Dados 📊:** Gráficos interativos para visualizar o desempenho semanal de cada hábito.
+* **Arquitetura:** Totalmente containerizada, com separação clara entre Frontend, Backend e Banco de Dados.
 
-* **Adicionar e Remover Hábitos:** Regista e apaga hábitos diários.
-* **Marcar como Concluído:** Clica para marcar um hábito como feito no dia.
-* **Estatísticas Visuais:**
-    * **Streak (Sequência) 🔥:** Mostra quantos dias seguidos completaste um hábito.
-    * **Taxa de Sucesso 📊:** Calcula a percentagem de sucesso desde que o hábito foi criado.
-    * **Gráfico de 7 Dias:** Um gráfico de barras simples mostra a tua performance na última semana.
-* **Sugestão de Hábitos com IA ✨:**
-    * Tens uma meta grande? (ex: "Correr uma maratona")
-    * Escreve a meta no input e clica no botão "✨".
-    * A aplicação usa a API do Google Gemini para quebrar essa meta em 3-5 hábitos diários mais pequenos e fáceis de gerir (ex: "Alongar 10 min", "Correr 3km", "Beber 3L de água").
+## 🛠️ Tech Stack
 
-## 🛠️ Tecnologias Utilizadas
+### Infraestrutura
+* **Docker & Docker Compose:** Orquestração de containers.
+* **PostgreSQL:** Banco de dados relacional robusto.
 
-* **Backend:** Python, Flask, Flask-SQLAlchemy
-* **Frontend:** HTML5, CSS3, JavaScript (Puro / Vanilla JS)
-* **Base de Dados:** SQLite
-* **API de IA:** Google Gemini
+### Backend (API)
+* **Python 3.11 + FastAPI:** Framework moderno e assíncrono.
+* **SQLAlchemy (Async):** ORM para comunicação com o banco.
+* **LangChain:** Framework para integração com LLMs.
+* **Google Gemini 2.5 Flash:** Modelo de IA Generativa.
+* **Alembic:** Migrações de banco de dados.
 
-## 🏁 Como Executar o Projeto Localmente
+### Frontend (Client)
+* **Vue.js 3 (Composition API):** Framework reativo.
+* **TypeScript:** Segurança de tipagem.
+* **Vite:** Build tool.
+* **Pinia:** Gestão de estado global.
+* **Chart.js:** Visualização de dados.
 
-1.  **Clona o repositório:**
+## 🏁 Como Executar o Projeto
+
+### Pré-requisitos
+* [Docker Desktop](https://www.docker.com/products/docker-desktop/) instalado e rodando.
+* Uma API Key do [Google AI Studio](https://aistudio.google.com/).
+
+### Passo a Passo
+
+1.  **Clone o repositório:**
     ```bash
-    git clone https://github.com/JoaoMarcosJJ/habits-ai.git
+    git clone [https://github.com/JoaoMarcosJJ/habits-ai.git](https://github.com/JoaoMarcosJJ/habits-ai.git)
+    cd habits-ai
     ```
 
-2.  **Cria e ativa um ambiente virtual:**
-    ```bash
-    # Windows
-    python -m venv .venv
-    .\.venv\Scripts\activate
+2.  **Configure as Variáveis de Ambiente:**
+    * Crie um arquivo `.env` dentro da pasta `backend/`.
+    * Adicione a sua chave:
+    ```ini
+    POSTGRES_USER=admin
+    POSTGRES_PASSWORD=admin
+    POSTGRES_DB=habits_db
+    POSTGRES_SERVER=db
+    POSTGRES_PORT=5432
     
-    # macOS / Linux
-    python3 -m venv .venv
-    source .venv/bin/activate
+    GEMINI_API_KEY="SUA_CHAVE_AQUI"
     ```
 
-3.  **Instala as dependências:**
+3.  **Inicie a Aplicação (Docker):**
+    Na raiz do projeto, execute:
     ```bash
-    pip install -r requirements.txt
+    docker-compose up -d --build
     ```
 
 4.  **Configura a tua API Key:**
@@ -59,4 +75,4 @@ Um simples, mas poderoso, rastreador de hábitos construído com Python (Flask) 
     python app.py
     ```
 
-6.  Abre o teu navegador e visita: `localhost:5000/`
+6.  Abre o teu navegador e visita: `http://127.0.0.1:5000/`
